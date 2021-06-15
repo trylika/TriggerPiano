@@ -84,10 +84,11 @@ void readSonars() {
 
     while (micros() < timeoutMicros && finished == false) {
         finished = true;
+        uint32_t currentTime = micros();
         for (uint8_t i = 0; i < SONAR_NUM; i++) {
             if (sonarDistanceNew[i] == 0) {
                 if (digitalRead(sonar[i]) == 0) {
-                    sonarDistanceNew[i] = micros() - startMicros - SONAR_PING_OVERHEAD;
+                    sonarDistanceNew[i] = currentTime - startMicros - SONAR_PING_OVERHEAD;
                 } else {
                     finished = false;
                 }
