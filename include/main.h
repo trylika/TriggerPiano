@@ -5,14 +5,14 @@
 
 #define SONAR_ROUNDTRIP_CM_US 57
 #define SONAR_MAX_DISTANCE 300 // Maximum distance we want to ping for (in centimeters). Maximum sensor distance is rated at 400-500cm.
-#define SONAR_MAX_WAIT 17157 // Maximum uS to wait for sensor response. (SONAR_MAX_DISTANCE + 1) * SONAR_ROUNDTRIP_CM_US
+#define SONAR_MAX_WAIT (SONAR_MAX_DISTANCE + 1) * SONAR_ROUNDTRIP_CM_US // Maximum uS to wait for sensor response. (SONAR_MAX_DISTANCE + 1) * SONAR_ROUNDTRIP_CM_US
 #define SONAR_PING_OVERHEAD 2
 #define SONAR_SENSOR_DELAY 5800 // uS delay for sensor to start responding
 #define SONAR_NUM 3
 #define SONAR_TRIGGER 32
 
-#define MIDI_DISTANCE_START 570 // Raw values we care about start from this value. 10CM * SONAR_ROUNDTRIP_CM_US
-#define MIDI_DISTANCE_END 11400 // Raw values we care about end with this value. 200CM * SONAR_ROUNDTRIP_CM_US
+#define MIDI_DISTANCE_START 10 * SONAR_ROUNDTRIP_CM_US // Raw values we care about start from this value. CM * SONAR_ROUNDTRIP_CM_US
+#define MIDI_DISTANCE_END 200 * SONAR_ROUNDTRIP_CM_US // Raw values we care about end with this value. CM * SONAR_ROUNDTRIP_CM_US
 
 #define MIDI_VALUE_MIN 0
 #define MIDI_VALUE_MAX 127
