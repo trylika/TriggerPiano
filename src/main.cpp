@@ -1,6 +1,7 @@
 #include "main.h"
 
 void setup() {
+    memset(sonarStarted, 0, sizeof(sonarStarted));
     memset(sonarDistanceNew, 0, sizeof(sonarDistance));
     memset(sonarDistance, 0, sizeof(sonarDistance));
     memset(sonarDistanceTotal, 0, sizeof(sonarDistanceTotal));
@@ -8,6 +9,7 @@ void setup() {
     memset(sonarDistanceAvgIndex, 0, sizeof(sonarDistanceAvgIndex));
 
     memset(sonarMidi, 0, sizeof(sonarMidi));
+    memset(sonarMidiOnOff, 0, sizeof(sonarMidiOnOff));
 
     pinMode(SONAR_TRIGGER, OUTPUT);
     for (uint8_t i = 0; i < SONAR_NUM; i++) {
@@ -23,8 +25,6 @@ void loop() {
 
     readSonars();
 
-    calculateMovingAverage();
-
     // Convert to MIDI values
     for (uint8_t i = 0; i < SONAR_NUM; i++) {
         if (sonarDistance[i] >= MIDI_DISTANCE_START && sonarDistance[i] <= MIDI_DISTANCE_END) {
@@ -35,15 +35,13 @@ void loop() {
                 MIDI_VALUE_MIN,
                 MIDI_VALUE_MAX
             );
-            if (sonarMidiOnOff[i] == false) {
+            if (sonarMidiOnOff[i] == false) { // New input detected
                 sonarMidiOnOff[i] = true;
-                // New input detected
             }
         } else {
             sonarMidi[i] = 0;
-            if (sonarMidiOnOff[i] == true) {
+            if (sonarMidiOnOff[i] == true) { // Input lost
                 sonarMidiOnOff[i] = false;
-                // Input lost
             }
         }
     }
@@ -61,10 +59,11 @@ void triggerAll() {
     digitalWrite(SONAR_TRIGGER, LOW);   // Set trigger pin back to low.
 
     // Delay until at least one sensor start doing anything
-    uint32_t startMaxDelay = micros() + SONAR_MAX_WAIT + SENSOR_DELAY; // Maximum time we'll wait for ping to start (most sensors are <450uS, the SRF06 can take up to 34,300uS!)
+    uint32_t startMaxDelay = micros() + SONAR_MAX_WAIT + SONAR_SENSOR_DELAY; // Maximum time we'll wait for ping to start (most sensors are <450uS, the SRF06 can take up to 34,300uS!)
     while (micros() < startMaxDelay) {
         for (uint8_t i = 0; i < SONAR_NUM; i++) {
             if (digitalRead(sonar[i]) == 1) {
+                sonarStarted[i] = true;
                 return;
             }
         }
@@ -74,8 +73,11 @@ void triggerAll() {
 void readSonars() {
     bool finished = false;
 
-    // Reset new values
-    for (uint8_t i = 0; i < SONAR_NUM; i++) { sonarDistanceNew[i] = 0; }
+    // Reset new values and read out statuses
+    for (uint8_t i = 0; i < SONAR_NUM; i++) {
+        sonarStarted[i] = false;
+        sonarDistanceNew[i] = 0;
+    }
 
     triggerAll();
 
@@ -87,14 +89,20 @@ void readSonars() {
         uint32_t currentTime = micros();
         for (uint8_t i = 0; i < SONAR_NUM; i++) {
             if (sonarDistanceNew[i] == 0) {
-                if (digitalRead(sonar[i]) == 0) {
+                int currentState = digitalRead(sonar[i]);
+                if (currentState == 0 && sonarStarted[i] == true) { // If reading sensor data was started and just now finished
                     sonarDistanceNew[i] = currentTime - startMicros - SONAR_PING_OVERHEAD;
-                } else {
+                } else if (currentState == 1 && sonarStarted[i] == false) { // If reading sensor data wasn't started and still ongoing
+                    sonarStarted[i] = true;
+                    finished = false;
+                } else { // Any other case
                     finished = false;
                 }
             }
         }
     }
+
+    calculateMovingAverage();
 }
 
 void calculateMovingAverage() {
