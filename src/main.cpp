@@ -36,7 +36,7 @@ void loop() {
 void calculateMiDi() {
     // Convert to MIDI values
     for (uint8_t i = 0; i < SONAR_NUM; i++) {
-        if (sonarDistance[i] >= MIDI_DISTANCE_START && sonarDistance[i] <= MIDI_DISTANCE_END) {
+        if (sonarDistance[i] > 0) {
             sonarMidi[i] = map(
                 constrain(sonarDistance[i], MIDI_DISTANCE_START, MIDI_DISTANCE_END),
                 MIDI_DISTANCE_START,
