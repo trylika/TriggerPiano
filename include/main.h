@@ -37,7 +37,9 @@ void loop();
 void triggerAll();
 void readSonars();
 void calculateMovingAverage();
+void calculateMiDi();
 void printDebug();
+void printPlotter();
 uint32_t convertToCm(uint32_t us);
 
 #endif

@@ -25,6 +25,15 @@ void loop() {
 
     readSonars();
 
+    calculateMiDi();
+
+    // Process MIDI here
+
+    printDebug();
+    // printPlotter();
+}
+
+void calculateMiDi() {
     // Convert to MIDI values
     for (uint8_t i = 0; i < SONAR_NUM; i++) {
         if (sonarDistance[i] >= MIDI_DISTANCE_START && sonarDistance[i] <= MIDI_DISTANCE_END) {
@@ -37,18 +46,16 @@ void loop() {
             );
             if (sonarMidiOnOff[i] == false) { // New input detected
                 sonarMidiOnOff[i] = true;
+                // Event On
             }
         } else {
             sonarMidi[i] = 0;
             if (sonarMidiOnOff[i] == true) { // Input lost
                 sonarMidiOnOff[i] = false;
+                // Event Off
             }
         }
     }
-
-    // Process MIDI here
-
-    printDebug();
 }
 
 void triggerAll() {
@@ -129,6 +136,17 @@ void printDebug() {
         Serial.print("MIDI on/off: "); Serial.print(sonarMidiOnOff[i]);
 
         Serial.print(") ");
+    }
+    Serial.println();
+}
+
+void printPlotter() {
+    for (uint8_t i = 0; i < SONAR_NUM; i++) {
+        Serial.print(i); Serial.print(":");
+        Serial.print(sonarDistance[i]);
+        if (i < SONAR_NUM - 1) {
+            Serial.print(", ");
+        }
     }
     Serial.println();
 }
