@@ -59,11 +59,11 @@ void calculateMiDi() {
 }
 
 void triggerAll() {
-    digitalWrite(SONAR_TRIGGER, LOW);   // Set the trigger pin low, should already be low, but this will make sure it is.
-    delayMicroseconds(4);         // Wait for pin to go low.
-    digitalWrite(SONAR_TRIGGER, HIGH);  // Set trigger pin high, this tells the sensor to send out a ping.
-    delayMicroseconds(10);        // Wait long enough for the sensor to realize the trigger pin is high. Sensor specs say to wait 10uS.
-    digitalWrite(SONAR_TRIGGER, LOW);   // Set trigger pin back to low.
+    digitalWrite(SONAR_TRIGGER, LOW); // Set the trigger pin low, should already be low, but this will make sure it is.
+    delayMicroseconds(4); // Wait for pin to go low.
+    digitalWrite(SONAR_TRIGGER, HIGH); // Set trigger pin high, this tells the sensor to send out a ping.
+    delayMicroseconds(10); // Wait long enough for the sensor to realize the trigger pin is high. Sensor specs say to wait 10uS.
+    digitalWrite(SONAR_TRIGGER, LOW); // Set trigger pin back to low.
 
     // Delay until at least one sensor start doing anything
     uint32_t startMaxDelay = micros() + SONAR_MAX_WAIT + SONAR_SENSOR_DELAY; // Maximum time we'll wait for ping to start (most sensors are <450uS, the SRF06 can take up to 34,300uS!)
