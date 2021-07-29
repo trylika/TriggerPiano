@@ -8,7 +8,7 @@ void setup() {
     memset(sonarDistance, 0, sizeof(sonarDistance));
     memset(sonarDistanceTotal, 0, sizeof(sonarDistanceTotal));
     memset(sonarDistanceAvg, 0, sizeof(sonarDistanceAvg));
-    memset(sonarDistanceAvgIndex, 0, sizeof(sonarDistanceAvgIndex));
+    memset(sonarDistanceAvgIndex, 0, sizeof(sonarDistanceAvgIndex));    
 
     memset(sonarMidi, 0, sizeof(sonarMidi));
     memset(sonarMidiOnOff, 0, sizeof(sonarMidiOnOff));
@@ -60,7 +60,7 @@ void setup() {
 
 void loop() {
     // Just delay to slow down while inside
-    delay(50); // Wait 50ms between pings (about 20 pings/sec). 29ms should be the shortest delay between pings.
+    //delay(50); // Wait 50ms between pings (about 20 pings/sec). 29ms should be the shortest delay between pings.
 
     MIDI.read();
 
@@ -70,14 +70,14 @@ void loop() {
 
     // Process MIDI here
 
-    printDebug();
-    // printPlotter();
+    //printDebug();
+     printPlotter();
 }
 
 void calculateMiDi() {
     // Convert to MIDI values
     for (uint8_t i = 0; i < SONAR_NUM; i++) {
-        if (sonarDistance[i] > 0) {
+        if (sonarDistance[i] >= MIDI_DISTANCE_START && sonarDistance[i] <= MIDI_DISTANCE_END) {
             sonarMidi[i] = map(
                 constrain(sonarDistance[i], MIDI_DISTANCE_START, MIDI_DISTANCE_END),
                 MIDI_DISTANCE_START,
@@ -162,9 +162,9 @@ void calculateMovingAverage() {
         sonarDistanceAvg[i][sonarDistanceAvgIndex[i]] = pingResult;
         sonarDistanceTotal[i] += pingResult;
 
-        sonarDistanceAvgIndex[i] = (sonarDistanceAvgIndex[i] + 1) % 10;
+        sonarDistanceAvgIndex[i] = (sonarDistanceAvgIndex[i] + 1) % 50;
 
-        sonarDistance[i] = sonarDistanceTotal[i] / 10.0f;
+        sonarDistance[i] = sonarDistanceTotal[i] / 50.0f;
     }
 }
 
@@ -186,7 +186,7 @@ void printDebug() {
 void printPlotter() {
     for (uint8_t i = 0; i < SONAR_NUM; i++) {
         Serial.print(i); Serial.print(":");
-        Serial.print(sonarDistance[i]);
+        Serial.print(convertToCm(sonarDistance[i]));
         if (i < SONAR_NUM - 1) {
             Serial.print(", ");
         }
