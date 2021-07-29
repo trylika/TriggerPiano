@@ -3,6 +3,15 @@
 
 #include <Arduino.h>
 
+#include <WiFi.h>
+#include <WiFiClient.h>
+#include <WiFiUdp.h>
+
+#include <AppleMIDI.h>
+
+#define SerialMon Serial
+#define APPLEMIDI_DEBUG SerialMon
+
 #define SONAR_ROUNDTRIP_CM_US 57
 #define SONAR_MAX_DISTANCE 300 // Maximum distance we want to ping for (in centimeters). Maximum sensor distance is rated at 400-500cm.
 #define SONAR_MAX_WAIT (SONAR_MAX_DISTANCE + 1) * SONAR_ROUNDTRIP_CM_US // Maximum uS to wait for sensor response. (SONAR_MAX_DISTANCE + 1) * SONAR_ROUNDTRIP_CM_US
@@ -31,6 +40,10 @@ uint8_t sonarDistanceAvgIndex[SONAR_NUM];
 
 int16_t sonarMidi[SONAR_NUM];
 bool sonarMidiOnOff[SONAR_NUM];
+
+char ssid[] = "ssid";
+char pass[] = "pass";
+int8_t isConnected = 0;
 
 void setup();
 void loop();

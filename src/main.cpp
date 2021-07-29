@@ -1,5 +1,7 @@
 #include "main.h"
 
+APPLEMIDI_CREATE_DEFAULTSESSION_INSTANCE();
+
 void setup() {
     memset(sonarStarted, 0, sizeof(sonarStarted));
     memset(sonarDistanceNew, 0, sizeof(sonarDistance));
@@ -17,11 +19,50 @@ void setup() {
     }
 
     Serial.begin(115200);
+
+    WiFi.begin(ssid, pass);
+
+    while (WiFi.status() != WL_CONNECTED) {
+        delay(500);
+        Serial.println("Establishing connection to WiFi..");
+    }
+
+    Serial.println("Connected to network");
+    Serial.println(WiFi.localIP());
+    DBG(F("OK, now make sure you an rtpMIDI session that is Enabled"));
+    DBG(F("Add device named Arduino with Host"), WiFi.localIP(), "Port", AppleMIDI.getPort(), "(Name", AppleMIDI.getName(), ")");
+    DBG(F("Select and then press the Connect button"));
+    DBG(F("Then open a MIDI listener and monitor incoming notes"));
+    DBG(F("Listen to incoming MIDI commands"));
+
+    MIDI.begin();
+
+    AppleMIDI.setHandleConnected([](const APPLEMIDI_NAMESPACE::ssrc_t & ssrc, const char* name) {
+        isConnected++;
+        DBG(F("Connected to session"), ssrc, name);
+    });
+
+    AppleMIDI.setHandleDisconnected([](const APPLEMIDI_NAMESPACE::ssrc_t & ssrc) {
+        isConnected--;
+        DBG(F("Disconnected"), ssrc);
+    });
+  
+    MIDI.setHandleNoteOn([](byte channel, byte note, byte velocity) {
+        DBG(F("NoteOn"), note);
+    });
+
+    MIDI.setHandleNoteOff([](byte channel, byte note, byte velocity) {
+        DBG(F("NoteOff"), note);
+    });
+
+    DBG(F("Sending NoteOn/Off of note 45, every second"));
 }
 
 void loop() {
     // Just delay to slow down while inside
     delay(50); // Wait 50ms between pings (about 20 pings/sec). 29ms should be the shortest delay between pings.
+
+    MIDI.read();
 
     readSonars();
 
@@ -47,12 +88,14 @@ void calculateMiDi() {
             if (sonarMidiOnOff[i] == false) { // New input detected
                 sonarMidiOnOff[i] = true;
                 // Event On
+                MIDI.sendNoteOn(60+i, 100, 1);
             }
         } else {
             sonarMidi[i] = 0;
             if (sonarMidiOnOff[i] == true) { // Input lost
                 sonarMidiOnOff[i] = false;
                 // Event Off
+                MIDI.sendNoteOff(60+i, 100, 1);
             }
         }
     }
